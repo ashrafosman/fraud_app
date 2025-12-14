@@ -62,4 +62,4 @@ Thumbs.db
 .ipynb_checkpoints
 
 # Config (may contain sensitive info - provide template instead)
-# config.yaml  # Uncomment this before pushing to GitHub!
+config.yaml  # User's actual config with credentials
