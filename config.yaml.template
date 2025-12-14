@@ -27,8 +27,8 @@ environments:
     vector_endpoint: "your-vector-endpoint"
     
     # LLM endpoint for AI functions and agent
-    # Options: databricks-claude-sonnet-4, databricks-meta-llama-3-1-405b-instruct
-    llm_endpoint: "databricks-claude-sonnet-4"
+    # Options: databricks-claude-sonnet-4-5, databricks-meta-llama-3-1-405b-instruct
+    llm_endpoint: "databricks-claude-sonnet-4-5"
     
     # Streamlit app name (will appear in URL)
     app_name: "fraud-detection-dev"
@@ -40,7 +40,7 @@ environments:
     schema: "claims_analysis"
     warehouse_id: "your-staging-warehouse-id"
     vector_endpoint: "your-staging-vector-endpoint"
-    llm_endpoint: "databricks-claude-sonnet-4"
+    llm_endpoint: "databricks-claude-sonnet-4-5"
     app_name: "fraud-detection-staging"
     
   prod:
@@ -50,7 +50,7 @@ environments:
     schema: "claims_analysis"
     warehouse_id: "your-prod-warehouse-id"
     vector_endpoint: "your-prod-vector-endpoint"
-    llm_endpoint: "databricks-claude-sonnet-4"
+    llm_endpoint: "databricks-claude-sonnet-4-5"
     app_name: "fraud-detection-prod"
 
 # Common configuration shared across all environments
@@ -108,7 +108,7 @@ common:
 #   schema: "claims_analysis"
 #   warehouse_id: "148ccb90800933a1"
 #   vector_endpoint: "one-env-shared-endpoint-2"
-#   llm_endpoint: "databricks-claude-sonnet-4"
+#   llm_endpoint: "databricks-claude-sonnet-4-5"
 #   app_name: "fraud-detection-dev"
 
 
