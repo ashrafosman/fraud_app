@@ -301,9 +301,18 @@ with tab1:
                 st.markdown("**Preview (first 5 rows):**")
                 st.dataframe(df.head(), use_container_width=True)
                 
-                # Store in session state
-                st.session_state.batch_claims = df
-                st.session_state.processing_complete = False
+                # Store in session state only if it's a new file or different data
+                # Check if this is actually new data to avoid resetting results
+                is_new_data = (
+                    st.session_state.batch_claims is None or 
+                    len(st.session_state.batch_claims) != len(df) or
+                    not st.session_state.batch_claims.equals(df)
+                )
+                
+                if is_new_data:
+                    st.session_state.batch_claims = df
+                    st.session_state.processing_complete = False
+                    st.session_state.batch_results = None
                 
         except Exception as e:
             st.error(f"Error reading file: {e}")
@@ -347,8 +356,12 @@ with tab2:
             selected_claims.append(claim_data)
         
         df = pd.DataFrame(selected_claims)
+        
+        # Only reset if it's actually new data
         st.session_state.batch_claims = df
         st.session_state.processing_complete = False
+        st.session_state.batch_results = None
+        
         st.success(f"✅ Loaded {len(df)} sample claims")
         st.rerun()
 
