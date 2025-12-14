@@ -173,10 +173,10 @@ def process_claim(claim_row, analysis_depth):
     classify_result = call_uc_function("fraud_classify", claim_row['claim_text'])
     
     if classify_result:
-        result['is_fraudulent'] = classify_result.get('is_fraudulent', False)
-        result['fraud_probability'] = classify_result.get('fraud_probability', 0.0)
-        result['fraud_type'] = classify_result.get('fraud_type', 'None')
-        result['confidence'] = classify_result.get('confidence', 0.0)
+        result['is_fraudulent'] = bool(classify_result.get('is_fraudulent', False))
+        result['fraud_probability'] = float(classify_result.get('fraud_probability', 0.0))
+        result['fraud_type'] = str(classify_result.get('fraud_type', 'None'))
+        result['confidence'] = float(classify_result.get('confidence', 0.0))
         result['verdict'] = "FRAUD" if result['is_fraudulent'] else "LEGITIMATE"
     else:
         result['is_fraudulent'] = False
@@ -441,7 +441,12 @@ if st.session_state.processing_complete and st.session_state.batch_results is no
     col1, col2, col3, col4 = st.columns(4)
     
     total_claims = len(results_df)
-    fraud_claims = len(results_df[results_df['is_fraudulent'] == True])
+    # Handle both boolean and string representations
+    fraud_claims = len(results_df[
+        (results_df['is_fraudulent'] == True) | 
+        (results_df['is_fraudulent'] == 'true') |
+        (results_df['verdict'] == 'FRAUD')
+    ])
     legitimate_claims = total_claims - fraud_claims
     fraud_percentage = (fraud_claims / total_claims * 100) if total_claims > 0 else 0
     
