@@ -6,8 +6,6 @@ Find similar historical fraud cases using vector similarity search
 import streamlit as st
 import os
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.core import Config
-from databricks import sql
 import pandas as pd
 
 # Page configuration
@@ -148,53 +146,60 @@ def get_workspace_client():
         st.error(f"Failed to initialize Databricks client: {e}")
         return None
 
-def get_sql_connection():
-    """Create Databricks SQL connection"""
-    try:
-        cfg = Config()
-        return sql.connect(
-            server_hostname=cfg.host,
-            http_path=f"/sql/1.0/warehouses/{WAREHOUSE_ID}",
-            credentials_provider=lambda: cfg.authenticate,
-        )
-    except Exception as e:
-        st.error(f"SQL Connection error: {e}")
-        return None
-
 w = get_workspace_client()
+
+def execute_sql_query(query):
+    """Execute SQL query using Statement Execution API"""
+    if not w:
+        st.error("WorkspaceClient not initialized")
+        return None
+    
+    try:
+        result = w.statement_execution.execute_statement(
+            warehouse_id=WAREHOUSE_ID,
+            statement=query,
+            wait_timeout="50s"
+        )
+        
+        if result.status.state.value == "SUCCEEDED":
+            if result.result and result.result.data_array:
+                return result.result.data_array
+            return []
+        else:
+            st.error(f"Query failed: {result.status.state.value}")
+            return None
+    except Exception as e:
+        st.error(f"SQL execution error: {e}")
+        return None
 
 # Helper Functions
 def get_claim_description_by_id(claim_id: str) -> str:
     """Lookup claim description from claims_data table by claim_id"""
-    sql_conn = get_sql_connection()
-    if not sql_conn:
-        return None
-    
     try:
-        with sql_conn.cursor() as cursor:
-            # Query the claims_data table to get claim information
-            cursor.execute(f"""
-                SELECT claim_id, claim_type, claimant_info, provider_info
-                FROM {CLAIMS_TABLE}
-                WHERE claim_id = '{claim_id}'
-                LIMIT 1
-            """)
-            result = cursor.fetchone()
-            if result:
-                # Create a search query from the claim details
-                claim_type = result[1]
-                claimant_info = result[2] if result[2] else ""
-                provider_info = result[3] if result[3] else ""
-                
-                # Construct a descriptive search query
-                search_text = f"{claim_type} claim"
-                if claimant_info:
-                    search_text += f" involving {claimant_info}"
-                if provider_info:
-                    search_text += f" from provider {provider_info}"
-                
-                return search_text
-            return None
+        # Query the claims_data table to get claim information
+        query = f"""
+            SELECT claim_id, claim_type, claimant_info, provider_info
+            FROM {CLAIMS_TABLE}
+            WHERE claim_id = '{claim_id}'
+            LIMIT 1
+        """
+        results = execute_sql_query(query)
+        if results and len(results) > 0:
+            result = results[0]
+            # Create a search query from the claim details
+            claim_type = result[1]
+            claimant_info = result[2] if result[2] else ""
+            provider_info = result[3] if result[3] else ""
+            
+            # Construct a descriptive search query
+            search_text = f"{claim_type} claim"
+            if claimant_info:
+                search_text += f" involving {claimant_info}"
+            if provider_info:
+                search_text += f" from provider {provider_info}"
+            
+            return search_text
+        return None
     except Exception as e:
         st.error(f"Error fetching claim: {e}")
         return None
