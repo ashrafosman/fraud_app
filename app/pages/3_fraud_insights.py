@@ -5,9 +5,7 @@ Displays analytics and trends from batch fraud analysis results
 
 import streamlit as st
 import os
-from databricks import sql
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.core import Config
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -152,7 +150,7 @@ CATALOG = os.getenv("CATALOG_NAME", "fraud_detection_dev")
 SCHEMA = os.getenv("SCHEMA_NAME", "claims_analysis")
 WAREHOUSE_ID = os.getenv("DATABRICKS_WAREHOUSE_ID")
 
-# Initialize clients
+# Initialize client
 @st.cache_resource
 def get_workspace_client():
     """Initialize Databricks WorkspaceClient"""
@@ -160,32 +158,33 @@ def get_workspace_client():
         return WorkspaceClient()
     except Exception as e:
         st.error(f"Failed to initialize Databricks client: {e}")
-        return None
-
-# Initialize clients
-@st.cache_resource
-def get_workspace_client():
-    """Initialize Databricks WorkspaceClient"""
-    try:
-        return WorkspaceClient()
-    except Exception as e:
-        st.error(f"Failed to initialize Databricks client: {e}")
-        return None
-
-def get_sql_connection():
-    """Create Databricks SQL connection - called lazily when needed"""
-    try:
-        cfg = Config()
-        return sql.connect(
-            server_hostname=cfg.host,
-            http_path=f"/sql/1.0/warehouses/{WAREHOUSE_ID}",
-            credentials_provider=lambda: cfg.authenticate,
-        )
-    except Exception as e:
-        st.error(f"SQL Connection error: {e}")
         return None
 
 w = get_workspace_client()
+
+def execute_sql_query(query):
+    """Execute SQL query using Statement Execution API"""
+    if not w:
+        st.error("WorkspaceClient not initialized")
+        return None
+    
+    try:
+        result = w.statement_execution.execute_statement(
+            warehouse_id=WAREHOUSE_ID,
+            statement=query,
+            wait_timeout="50s"
+        )
+        
+        if result.status.state.value == "SUCCEEDED":
+            if result.result and result.result.data_array:
+                return result.result.data_array
+            return []
+        else:
+            st.error(f"Query failed: {result.status.state.value}")
+            return None
+    except Exception as e:
+        st.error(f"SQL execution error: {e}")
+        return None
 
 # Get Genie Space ID - Try multiple sources in order
 def get_genie_space_id():
@@ -203,17 +202,14 @@ def get_genie_space_id():
     
     # Fall back to querying config_genie table
     try:
-        sql_conn = get_sql_connection()
-        if sql_conn:
-            with sql_conn.cursor() as cursor:
-                cursor.execute(f"""
-                    SELECT config_value 
-                    FROM {CATALOG}.{SCHEMA}.config_genie 
-                    WHERE config_key = 'genie_space_id'
-                """)
-                result = cursor.fetchone()
-                if result and result[0]:
-                    return result[0]
+        query = f"""
+            SELECT config_value 
+            FROM {CATALOG}.{SCHEMA}.config_genie 
+            WHERE config_key = 'genie_space_id'
+        """
+        result = execute_sql_query(query)
+        if result and len(result) > 0 and result[0][0]:
+            return result[0][0]
     except Exception as e:
         # Silently fail - will show warning in UI
         pass
@@ -226,28 +222,24 @@ GENIE_SPACE_ID = get_genie_space_id()
 @st.cache_data(ttl=300)
 def get_fraud_statistics():
     """Get overall fraud statistics"""
-    sql_conn = get_sql_connection()
-    if not sql_conn:
-        return None
-    
     try:
-        with sql_conn.cursor() as cursor:
-            cursor.execute(f"""
-                SELECT 
-                    COUNT(*) as total_claims,
-                    SUM(CASE WHEN is_fraudulent THEN 1 ELSE 0 END) as fraud_cases,
-                    ROUND(AVG(CASE WHEN is_fraudulent THEN 1.0 ELSE 0.0 END) * 100, 2) as fraud_rate,
-                    ROUND(AVG(risk_score), 2) as avg_risk_score
-                FROM {CATALOG}.{SCHEMA}.fraud_analysis
-            """)
-            result = cursor.fetchone()
-            if result:
-                return {
-                    "total_claims": result[0],
-                    "fraud_cases": result[1],
-                    "fraud_rate": result[2],
-                    "avg_risk_score": result[3]
-                }
+        query = f"""
+            SELECT 
+                COUNT(*) as total_claims,
+                SUM(CASE WHEN is_fraudulent THEN 1 ELSE 0 END) as fraud_cases,
+                ROUND(AVG(CASE WHEN is_fraudulent THEN 1.0 ELSE 0.0 END) * 100, 2) as fraud_rate,
+                ROUND(AVG(risk_score), 2) as avg_risk_score
+            FROM {CATALOG}.{SCHEMA}.fraud_analysis
+        """
+        result = execute_sql_query(query)
+        if result and len(result) > 0:
+            row = result[0]
+            return {
+                "total_claims": row[0],
+                "fraud_cases": row[1],
+                "fraud_rate": row[2],
+                "avg_risk_score": row[3]
+            }
     except Exception as e:
         st.error(f"Error fetching statistics: {e}")
     return None
@@ -255,24 +247,19 @@ def get_fraud_statistics():
 @st.cache_data(ttl=300)
 def get_fraud_by_type():
     """Get fraud breakdown by type"""
-    sql_conn = get_sql_connection()
-    if not sql_conn:
-        return None
-    
     try:
-        with sql_conn.cursor() as cursor:
-            cursor.execute(f"""
-                SELECT 
-                    fraud_type,
-                    COUNT(*) as count
-                FROM {CATALOG}.{SCHEMA}.fraud_analysis
-                WHERE is_fraudulent = TRUE
-                GROUP BY fraud_type
-                ORDER BY count DESC
-            """)
-            results = cursor.fetchall()
-            if results:
-                return pd.DataFrame(results, columns=["Fraud Type", "Count"])
+        query = f"""
+            SELECT 
+                fraud_type,
+                COUNT(*) as count
+            FROM {CATALOG}.{SCHEMA}.fraud_analysis
+            WHERE is_fraudulent = TRUE
+            GROUP BY fraud_type
+            ORDER BY count DESC
+        """
+        results = execute_sql_query(query)
+        if results:
+            return pd.DataFrame(results, columns=["Fraud Type", "Count"])
     except Exception as e:
         st.error(f"Error fetching fraud types: {e}")
     return None
@@ -280,26 +267,21 @@ def get_fraud_by_type():
 @st.cache_data(ttl=300)
 def get_top_indicators():
     """Get top fraud indicators"""
-    sql_conn = get_sql_connection()
-    if not sql_conn:
-        return None
-    
     try:
-        with sql_conn.cursor() as cursor:
-            cursor.execute(f"""
-                SELECT 
-                    explode(red_flags) as indicator
-                FROM {CATALOG}.{SCHEMA}.fraud_analysis
-                WHERE is_fraudulent = TRUE AND red_flags IS NOT NULL
-            """)
-            results = cursor.fetchall()
-            if results:
-                indicators = [r[0] for r in results]
-                indicator_counts = pd.Series(indicators).value_counts().head(10)
-                return pd.DataFrame({
-                    "Indicator": indicator_counts.index,
-                    "Count": indicator_counts.values
-                })
+        query = f"""
+            SELECT 
+                explode(red_flags) as indicator
+            FROM {CATALOG}.{SCHEMA}.fraud_analysis
+            WHERE is_fraudulent = TRUE AND red_flags IS NOT NULL
+        """
+        results = execute_sql_query(query)
+        if results:
+            indicators = [r[0] for r in results]
+            indicator_counts = pd.Series(indicators).value_counts().head(10)
+            return pd.DataFrame({
+                "Indicator": indicator_counts.index,
+                "Count": indicator_counts.values
+            })
     except Exception as e:
         st.error(f"Error fetching indicators: {e}")
     return None
@@ -307,24 +289,19 @@ def get_top_indicators():
 @st.cache_data(ttl=300)
 def get_fraud_trends():
     """Get fraud detection trends over time"""
-    sql_conn = get_sql_connection()
-    if not sql_conn:
-        return None
-    
     try:
-        with sql_conn.cursor() as cursor:
-            cursor.execute(f"""
-                SELECT 
-                    DATE(analysis_timestamp) as date,
-                    COUNT(*) as total_claims,
-                    SUM(CASE WHEN is_fraudulent THEN 1 ELSE 0 END) as fraud_cases
-                FROM {CATALOG}.{SCHEMA}.fraud_analysis
-                GROUP BY DATE(analysis_timestamp)
-                ORDER BY date
-            """)
-            results = cursor.fetchall()
-            if results:
-                return pd.DataFrame(results, columns=["Date", "Total Claims", "Fraud Cases"])
+        query = f"""
+            SELECT 
+                DATE(analysis_timestamp) as date,
+                COUNT(*) as total_claims,
+                SUM(CASE WHEN is_fraudulent THEN 1 ELSE 0 END) as fraud_cases
+            FROM {CATALOG}.{SCHEMA}.fraud_analysis
+            GROUP BY DATE(analysis_timestamp)
+            ORDER BY date
+        """
+        results = execute_sql_query(query)
+        if results:
+            return pd.DataFrame(results, columns=["Date", "Total Claims", "Fraud Cases"])
     except Exception as e:
         st.error(f"Error fetching trends: {e}")
     return None
