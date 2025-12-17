@@ -27,6 +27,21 @@ st.markdown("""
         background-color: #0A1929;
         color: #E7EBF0;
     }
+    
+    /* Sidebar dark theme */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0e2238 0%, #0A1929 100%);
+        border-right: 1px solid #1E4976;
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: #E7EBF0 !important;
+    }
+    
+    [data-testid="stSidebar"] h1 {
+        color: #00D9FF !important;
+    }
+    
     h1, h2, h3, h4, h5, h6 {
         color: #00D9FF !important;
     }
