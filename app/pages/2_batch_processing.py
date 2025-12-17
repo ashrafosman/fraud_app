@@ -75,6 +75,60 @@ st.markdown("""
         background: #132F4C;
         border: 1px solid #1E4976;
     }
+    
+    /* Expanders dark theme */
+    .streamlit-expanderHeader {
+        background: #132F4C;
+        border: 1px solid #1E4976;
+        border-radius: 10px;
+        color: #E7EBF0;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        border-color: #00D9FF;
+    }
+    
+    .streamlit-expanderContent {
+        background: #132F4C;
+        border: 1px solid #1E4976;
+        color: #E7EBF0;
+    }
+    
+    /* Code blocks */
+    .stCode {
+        background: #0e2238 !important;
+        border: 1px solid #1E4976 !important;
+    }
+    
+    /* Success/Warning/Error boxes */
+    .stSuccess {
+        background: #132F4C;
+        border-left: 4px solid #00CCA3;
+        color: #E7EBF0;
+    }
+    
+    .stWarning {
+        background: #132F4C;
+        border-left: 4px solid #FFD93D;
+        color: #E7EBF0;
+    }
+    
+    .stError {
+        background: #132F4C;
+        border-left: 4px solid #FF6B6B;
+        color: #E7EBF0;
+    }
+    
+    .stInfo {
+        background: #132F4C;
+        border-left: 4px solid #00D9FF;
+        color: #E7EBF0;
+    }
+    
+    /* Progress bars */
+    .stProgress > div > div {
+        background: #00D9FF;
+    }
 </style>
 """, unsafe_allow_html=True)
 
