@@ -20,8 +20,54 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📈 Fraud Insights")
-st.markdown("*Analytics and trends from fraud detection analysis*")
+# Dark theme CSS
+st.markdown("""
+<style>
+    .stApp {
+        background-color: #0A1929;
+        color: #E7EBF0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        color: #00D9FF !important;
+    }
+    p, li, span, label {
+        color: #E7EBF0 !important;
+    }
+    .stButton > button {
+        background: linear-gradient(135deg, #00D9FF 0%, #00CCA3 100%);
+        color: #0A1929;
+        border: 2px solid #00D9FF;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 12px 30px;
+    }
+    .stButton > button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 25px rgba(0,217,255,0.5);
+    }
+    [data-testid="stMetric"] {
+        background: #132F4C;
+        border: 1px solid #1E4976;
+        border-radius: 12px;
+        padding: 15px;
+    }
+    [data-testid="stMetricValue"] {
+        color: #00D9FF !important;
+    }
+    .stSelectbox > div > div {
+        background: #132F4C;
+        border: 1px solid #1E4976;
+        color: #E7EBF0;
+    }
+    /* Plotly charts dark theme */
+    .js-plotly-plot {
+        background: #132F4C !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1 style='color: #00D9FF;'>📈 Fraud Insights</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color: #B2BAC2; font-size: 1.1rem;'>Analytics and trends from fraud detection analysis</p>", unsafe_allow_html=True)
 
 # Configuration
 CATALOG = os.getenv("CATALOG_NAME", "fraud_detection_dev")

@@ -105,6 +105,32 @@ st.markdown("""
     p, li, span {
         color: #E7EBF0 !important;
     }
+    
+    /* Dropdown options styling */
+    .stSelectbox > div > div > div {
+        background: #132F4C;
+        color: #E7EBF0;
+    }
+    
+    [data-baseweb="select"] > div {
+        background: #132F4C;
+        color: #E7EBF0;
+    }
+    
+    [role="listbox"] {
+        background: #132F4C !important;
+        border: 1px solid #1E4976 !important;
+    }
+    
+    [role="option"] {
+        background: #132F4C !important;
+        color: #E7EBF0 !important;
+    }
+    
+    [role="option"]:hover {
+        background: #1E4976 !important;
+        color: #00D9FF !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -474,7 +500,7 @@ else:
     
     col1, col2, col3 = st.columns([2, 2, 3])
     with col1:
-        analyze_btn = st.button("🚀 Analyze with AI Agent", type="primary", use_container_width=True)
+        analyze_btn = st.button("🚀 Analyze with AI Agent", use_container_width=True)
     with col2:
         if claim_text:
             word_count = len(claim_text.split())
@@ -486,8 +512,8 @@ else:
             """, unsafe_allow_html=True)
     with col3:
         st.markdown("""
-        <div style='background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 12px; border-radius: 8px; margin-top: 5px;'>
-            <div style='font-size: 0.85rem; color: #666;'>
+        <div style='background: #132F4C; border: 1px solid #1E4976; padding: 12px; border-radius: 8px; margin-top: 5px;'>
+            <div style='font-size: 0.85rem; color: #E7EBF0;'>
                 <b>Available Tools:</b>
                 <span class='tool-badge badge-classify'>🎯 Classify</span>
                 <span class='tool-badge badge-extract'>📊 Extract</span>
