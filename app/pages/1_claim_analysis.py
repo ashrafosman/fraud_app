@@ -9,11 +9,108 @@ import json
 import time
 from databricks.sdk import WorkspaceClient
 
-st.title("📊 Claim Analysis")
+# Page config
+st.set_page_config(page_title="Claim Analysis", page_icon="📊", layout="wide")
 
+# Dark tech theme CSS
 st.markdown("""
-Analyze healthcare claims for fraud using AI - designed for health insurance payers.
-""")
+<style>
+    .stApp {
+        background-color: #0A1929;
+        color: #E7EBF0;
+    }
+    
+    .modern-title {
+        background: linear-gradient(90deg, #00D9FF 0%, #00CCA3 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #132F4C 0%, #0e2238 100%);
+        border: 1px solid #1E4976;
+        color: #E7EBF0;
+        padding: 25px;
+        border-radius: 15px;
+        margin: 20px 0;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    
+    .sample-card {
+        background: #132F4C;
+        border: 1px solid #1E4976;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 10px 0;
+        border-left: 4px solid #00D9FF;
+        transition: all 0.3s ease;
+    }
+    
+    .sample-card:hover {
+        border-color: #00D9FF;
+        box-shadow: 0 8px 25px rgba(0,217,255,0.2);
+        transform: translateX(5px);
+    }
+    
+    .tool-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin: 5px;
+    }
+    
+    .badge-classify {
+        background: #00D9FF;
+        color: #0A1929;
+    }
+    
+    .badge-extract {
+        background: #00CCA3;
+        color: #0A1929;
+    }
+    
+    .badge-search {
+        background: #1E4976;
+        color: #00D9FF;
+    }
+    
+    .badge-explain {
+        background: #FFD93D;
+        color: #0A1929;
+    }
+    
+    /* Text inputs dark theme */
+    .stTextInput > div > div, .stTextArea > div > div {
+        background: #132F4C;
+        border: 1px solid #1E4976;
+        color: #E7EBF0;
+    }
+    
+    .stSelectbox > div > div {
+        background: #132F4C;
+        border: 1px solid #1E4976;
+        color: #E7EBF0;
+    }
+    
+    /* Headers */
+    h1, h2, h3, h4, h5, h6 {
+        color: #00D9FF !important;
+    }
+    
+    p, li, span {
+        color: #E7EBF0 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Header
+st.markdown("<h1 class='modern-title'>📊 AI Claim Analysis</h1>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 1.2rem; color: #B2BAC2; margin-top: -10px;'>Intelligent fraud detection powered by LangGraph AI Agent</p>", unsafe_allow_html=True)
 
 # Read configuration from environment (set in app.yaml)
 CATALOG = os.getenv("CATALOG_NAME", "fraud_detection_dev")
@@ -290,58 +387,132 @@ Description: Lab billing each component test separately instead of bundled panel
 }
 
 # Main UI
-st.markdown("---")
+st.markdown("<br>", unsafe_allow_html=True)
 
 if not LANGCHAIN_AVAILABLE:
-    st.error("❌ LangChain/LangGraph not available. Please install required packages.")
-    st.code("pip install langgraph>=1.0.0 langchain>=0.3.0 langchain-core>=0.3.0 databricks-langchain")
-else:
-    st.subheader("🧠 LangGraph ReAct Agent")
     st.markdown("""
-    **Intelligent Agent:** Uses LangGraph's ReAct (Reasoning + Acting) pattern to:
-    - 🧠 **Think** about which tools to use
-    - 🔧 **Act** by calling the right fraud detection tools
-    - 🔄 **Observe** the results and decide next steps
-    - 🎯 **Adapt** its strategy based on claim complexity
-    """)
+    <div style='background: #FF6B6B; color: white; padding: 20px; border-radius: 15px; margin: 20px 0;'>
+        <h3 style='margin: 0 0 10px 0;'>❌ LangChain/LangGraph Not Available</h3>
+        <p style='margin: 0;'>Please install required packages:</p>
+        <code style='background: rgba(0,0,0,0.2); padding: 10px; display: block; margin-top: 10px; border-radius: 5px;'>
+        pip install langgraph>=1.0.0 langchain>=0.3.0 langchain-core>=0.3.0 databricks-langchain
+        </code>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    # Agent Info Box
+    st.markdown("""
+    <div class='info-box'>
+        <h3 style='margin: 0 0 15px 0; color: #00D9FF;'>🧠 LangGraph ReAct Agent</h3>
+        <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;'>
+            <div>
+                <div style='font-size: 1.5rem; margin-bottom: 5px;'>🧠</div>
+                <b style='color: #E7EBF0;'>Think</b><br/>
+                <small style='opacity: 0.8; color: #B2BAC2;'>Analyze which tools to use</small>
+            </div>
+            <div>
+                <div style='font-size: 1.5rem; margin-bottom: 5px;'>🔧</div>
+                <b style='color: #E7EBF0;'>Act</b><br/>
+                <small style='opacity: 0.8; color: #B2BAC2;'>Execute fraud detection tools</small>
+            </div>
+            <div>
+                <div style='font-size: 1.5rem; margin-bottom: 5px;'>🔄</div>
+                <b style='color: #E7EBF0;'>Observe</b><br/>
+                <small style='opacity: 0.8; color: #B2BAC2;'>Review results and iterate</small>
+            </div>
+            <div>
+                <div style='font-size: 1.5rem; margin-bottom: 5px;'>🎯</div>
+                <b style='color: #E7EBF0;'>Adapt</b><br/>
+                <small style='opacity: 0.8; color: #B2BAC2;'>Adjust strategy dynamically</small>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    # Claim input
+    # Claim input section
+    st.markdown("<h3 style='color: #667eea;'>📝 Claim Input</h3>", unsafe_allow_html=True)
+    
     col1, col2 = st.columns([3, 1])
     
     with col1:
         sample_choice = st.selectbox(
-            "Select a sample claim or enter your own:", 
-            ["Custom"] + list(SAMPLE_CLAIMS.keys())
+            "🔖 Select a sample claim or enter your own:", 
+            ["Custom"] + list(SAMPLE_CLAIMS.keys()),
+            help="Choose from pre-loaded healthcare claim examples or create your own"
         )
+    
+    with col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if sample_choice != "Custom":
+            # Show badge for fraud status
+            is_fraud = sample_choice in ["Upcoding Scheme", "Phantom Billing", "Prescription Drug Diversion", "Unbundling Fraud"]
+            badge_color = "#FF6B6B" if is_fraud else "#4ECDC4"
+            badge_text = "🚨 FRAUD" if is_fraud else "✅ LEGITIMATE"
+            st.markdown(f"""
+            <div style='background: {badge_color}; color: white; padding: 10px; border-radius: 10px; text-align: center; font-weight: 600; font-size: 0.9rem;'>
+                {badge_text}
+            </div>
+            """, unsafe_allow_html=True)
     
     if sample_choice == "Custom":
         claim_text = st.text_area(
-            "Enter claim details:", 
-            height=200, 
+            "📄 Enter claim details:", 
+            height=220, 
             value="",
-            placeholder="Enter claim ID, member ID, provider, date, amount, and description..."
+            placeholder="Enter claim ID, member ID, provider, date of service, billed amount, and description...\n\nExample:\nMedical claim #CLM-2024-001\nMember ID: MEM-456789\nProvider: Dr. Sarah Chen\nDate of Service: 2024-12-10\nBilled Amount: $185\nDescription: Annual wellness visit..."
         )
     else:
         claim_text = st.text_area(
-            "Enter claim details:", 
-            height=200, 
+            "📄 Claim details:", 
+            height=220, 
             value=SAMPLE_CLAIMS[sample_choice]
         )
     
-    col1, col2 = st.columns([1, 3])
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([2, 2, 3])
     with col1:
-        analyze_btn = st.button("🧠 Analyze with AI Agent", type="primary", use_container_width=True)
+        analyze_btn = st.button("🚀 Analyze with AI Agent", type="primary", use_container_width=True)
     with col2:
-        st.caption("The AI agent will intelligently analyze the claim for fraud")
+        if claim_text:
+            word_count = len(claim_text.split())
+            st.markdown(f"""
+            <div style='background: #f8f9fa; padding: 12px; border-radius: 8px; text-align: center; margin-top: 5px;'>
+                <div style='color: #667eea; font-weight: 600;'>{word_count}</div>
+                <div style='font-size: 0.8rem; color: #999;'>words</div>
+            </div>
+            """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 12px; border-radius: 8px; margin-top: 5px;'>
+            <div style='font-size: 0.85rem; color: #666;'>
+                <b>Available Tools:</b>
+                <span class='tool-badge badge-classify'>🎯 Classify</span>
+                <span class='tool-badge badge-extract'>📊 Extract</span>
+                <span class='tool-badge badge-search'>🔍 Search</span>
+                <span class='tool-badge badge-explain'>💡 Explain</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     if analyze_btn:
         if not claim_text.strip():
-            st.warning("⚠️ Please enter claim details")
+            st.markdown("""
+            <div style='background: #FFE66D; color: #333; padding: 15px; border-radius: 10px; margin: 20px 0;'>
+                <b>⚠️ Please enter claim details</b>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.markdown("---")
-            st.markdown("### 🤖 Agent Execution")
+            st.markdown("<br><hr style='border: 1px solid #eee; margin: 30px 0;'><br>", unsafe_allow_html=True)
+            st.markdown("""
+            <div style='text-align: center;'>
+                <h2 style='color: #667eea; margin-bottom: 10px;'>🤖 AI Agent Analysis</h2>
+                <p style='color: #666;'>Watch the AI agent reason through the fraud detection process</p>
+            </div>
+            <br>
+            """, unsafe_allow_html=True)
             
             total_start = time.time()
             
@@ -349,7 +520,11 @@ else:
             agent = create_langraph_agent()
             
             if not agent:
-                st.error("Failed to create LangGraph agent")
+                st.markdown("""
+                <div style='background: #FF6B6B; color: white; padding: 20px; border-radius: 15px;'>
+                    <h3 style='margin: 0;'>❌ Failed to create LangGraph agent</h3>
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 # System prompt
                 system_prompt = """You are an expert healthcare fraud detection analyst for insurance payers (Humana, UHG, Cigna, etc.). Your job is to analyze claims and detect fraud.
@@ -393,8 +568,14 @@ Be thorough but efficient."""
                             # Parse messages to show reasoning
                             messages = result.get('messages', [])
                             
-                            st.success(f"✅ Analysis complete in {elapsed_time:.0f}ms")
-                            st.markdown("---")
+                            st.markdown(f"""
+                            <div style='background: linear-gradient(135deg, #00CCA3 0%, #00D9FF 100%); color: #0A1929; padding: 20px; border-radius: 15px; text-align: center; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,204,163,0.3);'>
+                                <h3 style='margin: 0; color: #0A1929;'>✅ Analysis Complete!</h3>
+                                <p style='margin: 10px 0 0 0; font-size: 1.1rem; color: #0A1929;'>Processed in <b>{elapsed_time:.0f}ms</b></p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            st.markdown("<br>", unsafe_allow_html=True)
                             
                             # Show tool calls and reasoning
                             tool_calls = []
@@ -438,52 +619,112 @@ Be thorough but efficient."""
                             
                             # Display tool calls in expandable sections
                             if tool_calls:
-                                st.markdown("#### 🔧 Tools Used by Agent")
-                                st.info(f"Agent used **{len(tool_calls)} tools** out of 4 available")
+                                st.markdown("""
+                                <div style='background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 15px; margin: 20px 0;'>
+                                    <h3 style='color: #667eea; margin: 0 0 10px 0;'>🔧 Agent Tools Execution</h3>
+                                    <p style='color: #666; margin: 0;'>The AI agent intelligently used <b style='color: #667eea;'>{}</b> out of 4 available tools</p>
+                                </div>
+                                """.format(len(tool_calls)), unsafe_allow_html=True)
                                 
                                 for i, tc in enumerate(tool_calls, 1):
                                     tool_name = tc['name']
                                     tool_args = tc.get('args', {})
                                     tool_result = tc.get('result', 'No result')
                                     
-                                    # Icon based on tool
-                                    icon = "🎯" if "classify" in tool_name else "📊" if "extract" in tool_name else "📚" if "search" in tool_name else "💡"
+                                    # Icon and color based on tool
+                                    if "classify" in tool_name:
+                                        icon = "🎯"
+                                        color = "#667eea"
+                                        badge_class = "badge-classify"
+                                    elif "extract" in tool_name:
+                                        icon = "📊"
+                                        color = "#4ECDC4"
+                                        badge_class = "badge-extract"
+                                    elif "search" in tool_name:
+                                        icon = "🔍"
+                                        color = "#F093FB"
+                                        badge_class = "badge-search"
+                                    else:
+                                        icon = "💡"
+                                        color = "#FFE66D"
+                                        badge_class = "badge-explain"
                                     
                                     with st.expander(f"{icon} **Tool {i}: {tool_name}**", expanded=(i <= 2)):
-                                        st.write("**Input:**")
+                                        st.markdown(f"""
+                                        <div style='background: {color}15; padding: 15px; border-radius: 10px; border-left: 4px solid {color}; margin-bottom: 15px;'>
+                                            <h4 style='color: {color}; margin: 0 0 10px 0;'>{icon} {tool_name}</h4>
+                                        </div>
+                                        """, unsafe_allow_html=True)
+                                        
+                                        st.markdown("**📥 Input Parameters:**")
                                         st.json(tool_args)
                                         
-                                        st.write("**Output:**")
+                                        st.markdown("**📤 Output Result:**")
                                         try:
                                             result_json = json.loads(tool_result)
                                             st.json(result_json)
                                         except:
                                             st.text(tool_result[:500] + "..." if len(tool_result) > 500 else tool_result)
                             else:
-                                st.warning("No tool calls detected in agent execution")
+                                st.markdown("""
+                                <div style='background: #FFE66D; color: #333; padding: 15px; border-radius: 10px;'>
+                                    <b>⚠️ No tool calls detected in agent execution</b>
+                                </div>
+                                """, unsafe_allow_html=True)
                             
                             # Display final response
-                            st.markdown("---")
-                            st.markdown("#### 💡 Agent's Final Analysis")
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            st.markdown("""
+                            <div style='background: linear-gradient(135deg, #132F4C 0%, #0e2238 100%); border: 1px solid #00D9FF; padding: 25px; border-radius: 15px; color: #E7EBF0; margin: 20px 0;'>
+                                <h3 style='margin: 0 0 15px 0; color: #00D9FF;'>💡 Final Fraud Assessment</h3>
+                            </div>
+                            """, unsafe_allow_html=True)
                             
                             if agent_response:
-                                st.markdown(agent_response)
+                                st.markdown(f"""
+                                <div style='background: #132F4C; border: 1px solid #1E4976; padding: 25px; border-radius: 15px; margin: 20px 0; color: #E7EBF0;'>
+                                    {agent_response}
+                                </div>
+                                """, unsafe_allow_html=True)
                             else:
-                                st.info("Agent completed analysis. Check tool outputs above for details.")
+                                st.markdown("""
+                                <div style='background: rgba(0,204,163,0.1); border: 1px solid #00CCA3; padding: 20px; border-radius: 10px; color: #00CCA3;'>
+                                    <b>✓ Agent completed analysis. Check tool outputs above for details.</b>
+                                </div>
+                                """, unsafe_allow_html=True)
                             
                             # Performance metrics
-                            st.markdown("---")
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            st.markdown("<h4 style='color: #00D9FF; text-align: center;'>📊 Performance Metrics</h4>", unsafe_allow_html=True)
+                            
                             col1, col2, col3 = st.columns(3)
                             
                             with col1:
-                                st.metric("Tools Used", f"{len(tool_calls)}/4")
+                                st.markdown(f"""
+                                <div style='background: #132F4C; border: 1px solid #00D9FF; padding: 20px; border-radius: 15px; text-align: center;'>
+                                    <div style='font-size: 2.5rem; font-weight: 700; margin-bottom: 5px; color: #00D9FF;'>{len(tool_calls)}/4</div>
+                                    <div style='font-size: 0.9rem; color: #B2BAC2;'>Tools Used</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            
                             with col2:
-                                st.metric("Total Time", f"{elapsed_time:.0f}ms")
+                                st.markdown(f"""
+                                <div style='background: #132F4C; border: 1px solid #00CCA3; padding: 20px; border-radius: 15px; text-align: center;'>
+                                    <div style='font-size: 2.5rem; font-weight: 700; margin-bottom: 5px; color: #00CCA3;'>{elapsed_time:.0f}ms</div>
+                                    <div style='font-size: 0.9rem; color: #B2BAC2;'>Processing Time</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            
                             with col3:
                                 # Estimate cost based on tools used
                                 cost_per_tool = 0.0005
                                 total_cost = len(tool_calls) * cost_per_tool
-                                st.metric("Estimated Cost", f"${total_cost:.4f}")
+                                st.markdown(f"""
+                                <div style='background: #132F4C; border: 1px solid #FFD93D; padding: 20px; border-radius: 15px; text-align: center;'>
+                                    <div style='font-size: 2.5rem; font-weight: 700; margin-bottom: 5px; color: #FFD93D;'>${total_cost:.4f}</div>
+                                    <div style='font-size: 0.9rem; color: #B2BAC2;'>Estimated Cost</div>
+                                </div>
+                                """, unsafe_allow_html=True)
                             
                             # Show raw messages for debugging
                             with st.expander("🔍 Debug: Raw Agent Messages"):
@@ -501,19 +742,58 @@ Be thorough but efficient."""
                                 st.code(traceback.format_exc())
 
 # Example claims section
-st.markdown("---")
-with st.expander("💡 Example Healthcare Claims"):
+st.markdown("<br><br>", unsafe_allow_html=True)
+with st.expander("💡 Example Healthcare Claims Library", expanded=False):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("**✅ Legitimate Claims**")
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #00CCA3 0%, #00D9FF 100%); padding: 15px; border-radius: 10px; color: #0A1929; text-align: center; margin-bottom: 15px;'>
+            <h4 style='margin: 0; color: #0A1929;'>✅ Legitimate Claims</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class='sample-card'>
+            <h5 style='color: #00D9FF; margin-top: 0;'>Legitimate Office Visit</h5>
+        </div>
+        """, unsafe_allow_html=True)
         st.code(SAMPLE_CLAIMS["Legitimate Office Visit"][:250] + "...", language="text")
+        
+        st.markdown("""
+        <div class='sample-card'>
+            <h5 style='color: #00D9FF; margin-top: 0;'>Legitimate Preventive Care</h5>
+        </div>
+        """, unsafe_allow_html=True)
         st.code(SAMPLE_CLAIMS["Legitimate Preventive Care"][:250] + "...", language="text")
     
     with col2:
-        st.markdown("**🚨 Suspicious/Fraudulent Claims**")
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%); padding: 15px; border-radius: 10px; color: white; text-align: center; margin-bottom: 15px;'>
+            <h4 style='margin: 0;'>🚨 Fraudulent Claims</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class='sample-card'>
+            <h5 style='color: #FF6B6B; margin-top: 0;'>Upcoding Scheme</h5>
+        </div>
+        """, unsafe_allow_html=True)
         st.code(SAMPLE_CLAIMS["Upcoding Scheme"][:250] + "...", language="text")
+        
+        st.markdown("""
+        <div class='sample-card'>
+            <h5 style='color: #FF6B6B; margin-top: 0;'>Phantom Billing</h5>
+        </div>
+        """, unsafe_allow_html=True)
         st.code(SAMPLE_CLAIMS["Phantom Billing"][:250] + "...", language="text")
 
-st.markdown("---")
-st.caption("🏥 Healthcare Payer Fraud Detection | Built with LangGraph + Unity Catalog AI Functions | ☁️ Databricks Apps")
+# Footer
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("""
+<div style='text-align: center; padding: 20px; background: #132F4C; border: 1px solid #1E4976; border-radius: 15px; margin-top: 40px;'>
+    <p style='margin: 0; color: #00D9FF; font-weight: 600;'>
+        🏥 Healthcare Payer Fraud Detection | Built with LangGraph + Unity Catalog AI Functions | ☁️ Databricks Apps
+    </p>
+</div>
+""", unsafe_allow_html=True)

@@ -2,8 +2,8 @@ bundle:
   name: fraud_detection_claims
 
 workspace:
-  host: https://adb-984752964297111.11.azuredatabricks.net
-  profile: DEFAULT_azure
+  host: https://adb-3438839487639471.11.azuredatabricks.net
+  profile: work
 
 # Define variable that will be passed to notebooks
 variables:
@@ -20,8 +20,8 @@ targets:
     variables:
       environment: dev
     workspace:
-      host: https://adb-984752964297111.11.azuredatabricks.net
-      profile: DEFAULT_azure
+      host: https://adb-3438839487639471.11.azuredatabricks.net
+      profile: work
   
   # Staging target (same workspace, different catalog)
   staging:
@@ -29,8 +29,8 @@ targets:
     variables:
       environment: staging
     workspace:
-      host: https://adb-984752964297111.11.azuredatabricks.net
-      profile: DEFAULT_azure
+      host: https://adb-3438839487639471.11.azuredatabricks.net
+      profile: work
   
   # Production target (same workspace, different catalog)
   prod:
@@ -38,8 +38,8 @@ targets:
     variables:
       environment: prod
     workspace:
-      host: https://adb-984752964297111.11.azuredatabricks.net
-      profile: DEFAULT_azure
+      host: https://adb-3438839487639471.11.azuredatabricks.net
+      profile: work
 
 resources:
   jobs:

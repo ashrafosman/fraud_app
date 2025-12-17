@@ -12,19 +12,19 @@ command: ['streamlit', 'run', 'app_databricks.py']
 env:
   # Core Databricks connection
   - name: 'DATABRICKS_HOST'
-    value: 'adb-984752964297111.11.azuredatabricks.net'
+    value: 'adb-3438839487639471.11.azuredatabricks.net/'
   - name: 'DATABRICKS_WAREHOUSE_ID'
-    value: '148ccb90800933a1'
+    value: 'a94a22f8652d85c1'
   
   # Unity Catalog configuration
   - name: 'CATALOG_NAME'
-    value: 'fraud_detection_dev'
+    value: 'ashraf'
   - name: 'SCHEMA_NAME'
     value: 'claims_analysis'
   
   # Vector Search configuration
   - name: 'VECTOR_ENDPOINT'
-    value: 'one-env-shared-endpoint-2'
+    value: 'your-vector-endpoint'
   
   # LLM configuration
   - name: 'LLM_ENDPOINT'

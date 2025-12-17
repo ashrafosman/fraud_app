@@ -3,6 +3,9 @@
 
 set -e  # Exit on error
 
+# Skip TLS verification for macOS certificate issues
+export DATABRICKS_INSECURE_TLS_SKIP_VERIFY=true
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -45,7 +48,7 @@ fi
 
 # Step 4: Deploy with Databricks Asset Bundles
 echo "📦 Step 2: Deploying with Databricks Asset Bundles..."
-databricks bundle deploy --target ${ENVIRONMENT} --profile DEFAULT_azure
+databricks bundle deploy --target ${ENVIRONMENT} --profile work
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ ERROR: Deployment failed${NC}"
@@ -59,7 +62,7 @@ echo ""
 echo "⚙️  Step 3: Running setup job (creates catalog, tables, functions, data)..."
 echo ""
 
-databricks bundle run setup_fraud_detection --target ${ENVIRONMENT} --profile DEFAULT_azure
+databricks bundle run setup_fraud_detection --target ${ENVIRONMENT} --profile work
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ ERROR: Setup job failed${NC}"
@@ -95,7 +98,7 @@ sleep 5
 
 # Check if there's an active deployment and wait for it
 for i in {1..12}; do
-    APP_STATUS=$(databricks apps get frauddetection-${ENVIRONMENT} --profile DEFAULT_azure --output json 2>/dev/null | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('compute_status', {}).get('state', 'UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
+    APP_STATUS=$(databricks apps get frauddetection-${ENVIRONMENT} --profile work --output json 2>/dev/null | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('compute_status', {}).get('state', 'UNKNOWN'))" 2>/dev/null || echo "UNKNOWN")
     
     if [ "$APP_STATUS" != "DEPLOYING" ]; then
         echo "✅ App ready for deployment (status: $APP_STATUS)"

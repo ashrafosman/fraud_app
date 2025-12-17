@@ -12,6 +12,16 @@
 
 set -e
 
+# Skip TLS verification for macOS certificate issues
+export DATABRICKS_INSECURE_TLS_SKIP_VERIFY=true
+security find-certificate -a -p /Library/Keychains/System.keychain /System/Library/Keychains/SystemRootCertificates.keychain > ~/.databricks-certs.pem 2>/dev/null || true
+export SSL_CERT_FILE=~/.databricks-certs.pem
+export REQUESTS_CA_BUNDLE=~/.databricks-certs.pem
+
+# Unset environment variables that might override profile settings
+unset DATABRICKS_HOST
+unset DATABRICKS_TOKEN
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
